@@ -5,12 +5,13 @@ import (
 	"net/http"
 	"strconv"
 
+	pwdHashing "khrix/golang-nft/src/lib/pwdHashing"
+
 	"github.com/gin-gonic/gin"
-	"golang.org/x/crypto/bcrypt"
 )
 
 func handleGetAllUsers(context *gin.Context) {
-	users := UserConn().getAllUsers()
+	users := GetAllUsers()
 
 	var usersOutput []UserOutputDto
 
@@ -23,32 +24,32 @@ func handleGetAllUsers(context *gin.Context) {
 
 func handleGetUser(context *gin.Context) {
 	x, _ := strconv.ParseInt(context.Param("id"), 2, 32)
-	fmt.Println(x)
 
-	userFind := UserConn().getUserById(int32(x))
+	userFind := GetUserById(int32(x))
 
 	context.JSON(http.StatusOK, userFind)
 }
 
 func handleCreateUser(context *gin.Context) {
-
 	var userInputDto UserInputDto
 
 	if err := context.BindJSON(&userInputDto); err != nil {
 		panic(err)
 	}
 
-	hashed, _ := bcrypt.GenerateFromPassword([]byte(userInputDto.Password), 8)
+	hashed := pwdHashing.CreateHashPassword(userInputDto.Password)
 
-	userInputDto.Password = string(hashed)
+	userInputDto.Password = hashed
 
 	context.JSON(http.StatusOK, userInputDto)
-
 }
 
 func RegisterController(app *gin.Engine) {
 	NAME := "users"
-	app.GET(fmt.Sprintf("/%s", NAME), handleGetAllUsers)
-	app.GET(fmt.Sprintf("/%s/:id", NAME), handleGetUser)
-	app.POST(fmt.Sprintf("/%s", NAME), handleCreateUser)
+
+	routes := app.Group(fmt.Sprintf("/%s", NAME))
+
+	routes.GET("/", handleGetAllUsers)
+	routes.GET("/:id", handleGetUser)
+	routes.POST("/", handleCreateUser)
 }
