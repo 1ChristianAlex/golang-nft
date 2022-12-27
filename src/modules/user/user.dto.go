@@ -14,3 +14,7 @@ type UserInputDto struct {
 	Password string `json:"password" validate:"required"`
 	Role     int32  `json:"role" validate:"required"`
 }
+
+func (userInput UserOutputDto) MapUserOutputDto(userItem User) UserOutputDto {
+	return UserOutputDto{Name: userItem.Name, LastName: userItem.LastName, Email: userItem.Email, Role: userItem.Role}
+}

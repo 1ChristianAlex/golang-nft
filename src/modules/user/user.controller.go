@@ -16,7 +16,7 @@ func handleGetAllUsers(context *gin.Context) {
 	var usersOutput []UserOutputDto
 
 	for _, userItem := range users {
-		usersOutput = append(usersOutput, UserOutputDto{Name: userItem.Name, LastName: userItem.LastName, Email: userItem.Email, Role: userItem.Role})
+		usersOutput = append(usersOutput, UserOutputDto{}.MapUserOutputDto(userItem))
 	}
 
 	context.JSON(http.StatusOK, usersOutput)
@@ -34,7 +34,9 @@ func handleCreateUser(context *gin.Context) {
 	var userInputDto UserInputDto
 
 	if err := context.BindJSON(&userInputDto); err != nil {
-		panic(err)
+
+		context.AbortWithError(http.StatusBadRequest, err)
+		return
 	}
 
 	hashed := pwdHashing.CreateHashPassword(userInputDto.Password)
