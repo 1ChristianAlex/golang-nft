@@ -12,6 +12,6 @@ func getHelloController(context *gin.Context) {
 
 }
 
-func RegisterHelloController(app *gin.Engine) {
+func RegisterController(app *gin.Engine) {
 	app.GET("/", getHelloController)
 }
